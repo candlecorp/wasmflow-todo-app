@@ -1,0 +1,3 @@
+FROM envoyproxy/envoy-dev:817cfee4b1188d4e6ce57b2ab0964c317b36130f
+COPY todoapp-be/envoy.yaml /etc/envoy/envoy.yaml
+RUN chmod go+r /etc/envoy/envoy.yaml

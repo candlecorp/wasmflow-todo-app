@@ -1,0 +1,12 @@
+FROM amd64/node:18 AS build
+
+WORKDIR /root/app
+
+COPY todoapp-ui/package.json ./
+COPY todoapp-ui/package-lock.json ./
+RUN npm install
+COPY todoapp-ui/. ./
+RUN npm run build
+
+FROM nginx:1.19-alpine
+COPY --from=build /root/app/dist /usr/share/nginx/html

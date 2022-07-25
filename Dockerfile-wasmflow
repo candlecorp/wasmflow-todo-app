@@ -1,0 +1,20 @@
+FROM ubuntu:latest
+RUN  apt-get update \
+  && apt-get install -y wget \
+  && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 8060
+
+WORKDIR /wasmflow
+RUN wget -q https://github.com/wasmflow/wasmflow/releases/latest/download/wasmflow.linux.aarch64.tar.gz
+RUN tar xf wasmflow.linux.aarch64.tar.gz
+RUN cp wasmflow/wasmflow /usr/local/bin/wasmflow
+RUN cp wasmflow/wafl /usr/local/bin/wafl
+
+WORKDIR /usr/src/todoapp
+
+COPY ./todoapp-be/build/todo.signed.wasm ./build/todo.signed.wasm
+COPY ./todoapp-be/todos.wafl ./todos.wafl
+ENV PWD=/usr/src/todoapp
+
+CMD [ "wasmflow", "serve", "/usr/src/todoapp/todos.wafl", "--rpc" , "--rpc-port" , "8060"]
