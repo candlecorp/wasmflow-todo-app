@@ -1,0 +1,6 @@
+[submodule "todoapp-ui"]
+	path = todoapp-ui
+	url = git@github.com:candlecorp/todoapp-ui.git
+[submodule "todoapp-be"]
+	path = todoapp-be
+	url = git@github.com:candlecorp/todoapp-be.git
