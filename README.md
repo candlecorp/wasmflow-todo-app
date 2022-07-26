@@ -3,8 +3,7 @@ Frontend and Backend for Wasmflow based To Do Application.
 
 # How to Run
 - clone this repo
-- `git pull --recurse-submodule`
-- `git submodule update --recursive`
+- `git submodule update --init`
 - `docker-compose build`
 - `docker-compose run`
 
