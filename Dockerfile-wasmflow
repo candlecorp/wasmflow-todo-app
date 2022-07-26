@@ -1,18 +1,57 @@
-FROM ubuntu:latest
+FROM ubuntu:latest AS build
+
 RUN  apt-get update \
   && apt-get install -y wget \
-  && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y jq \
+  && apt-get install -y curl build-essential openssl libssl-dev
+
+
+ENV RUSTUP_HOME=/rust
+ENV CARGO_HOME=/cargo 
+ENV PATH=/cargo/bin:/rust/bin:$PATH
+
+RUN echo "(curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path) && rustup default nightly" > /install-rust.sh && chmod 755 /install-rust.sh
+
+ENV NODE_VERSION=16.16.0
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+
+RUN /install-rust.sh
+RUN rustup component add clippy
+RUN rustup target add wasm32-wasi
+RUN rustup target add wasm32-unknown-unknown
 
 WORKDIR /wasmflow
-RUN wget -q https://github.com/wasmflow/wasmflow/releases/latest/download/wasmflow.linux.aarch64.tar.gz
+RUN curl -L https://github.com/wasmflow/wasmflow/releases/latest/download/wasmflow.linux.aarch64.tar.gz --output wasmflow.linux.aarch64.tar.gz
 RUN tar xf wasmflow.linux.aarch64.tar.gz
-RUN cp wasmflow/wasmflow /usr/local/bin/wasmflow
-RUN cp wasmflow/wafl /usr/local/bin/wafl
+RUN cp ./wasmflow/wasmflow /usr/local/bin/wasmflow
+RUN cp ./wasmflow/wafl /usr/local/bin/wafl
+RUN chmod +x /usr/local/bin/wafl
+RUN chmod +x /usr/local/bin/wasmflow
+
+WORKDIR /usr/src/todoapp
+COPY todoapp-wf/. .
+RUN cargo install tomlq
+RUN npm install -g @candlecorp/codegen
+RUN make
+
+
+FROM ubuntu:latest
+
+COPY --from=build  /wasmflow/wasmflow/wasmflow /usr/local/bin/wasmflow
+COPY --from=build  /wasmflow/wasmflow/wafl /usr/local/bin/wafl
 
 WORKDIR /usr/src/todoapp
 
-COPY ./todoapp-be/build/todo.signed.wasm ./build/todo.signed.wasm
-COPY ./todoapp-be/todos.wafl ./todos.wafl
+COPY --from=build /usr/src/todoapp/build/todo.signed.wasm ./build/todo.signed.wasm
+COPY --from=build /usr/src/todoapp/todos.wafl ./todos.wafl
+
+
+
 ENV PWD=/usr/src/todoapp
 
 EXPOSE 8060
