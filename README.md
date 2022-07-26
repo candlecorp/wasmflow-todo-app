@@ -5,6 +5,6 @@ Frontend and Backend for Wasmflow based To Do Application.
 - clone this repo
 - `git submodule update --init`
 - `docker-compose build`
-- `docker-compose run`
+- `docker-compose up`
 
 In your browser, load up `http://localhost:8000`
