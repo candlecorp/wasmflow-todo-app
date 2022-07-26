@@ -3,8 +3,6 @@ RUN  apt-get update \
   && apt-get install -y wget \
   && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 8060
-
 WORKDIR /wasmflow
 RUN wget -q https://github.com/wasmflow/wasmflow/releases/latest/download/wasmflow.linux.aarch64.tar.gz
 RUN tar xf wasmflow.linux.aarch64.tar.gz
@@ -17,4 +15,6 @@ COPY ./todoapp-be/build/todo.signed.wasm ./build/todo.signed.wasm
 COPY ./todoapp-be/todos.wafl ./todos.wafl
 ENV PWD=/usr/src/todoapp
 
-CMD [ "wasmflow", "serve", "/usr/src/todoapp/todos.wafl", "--rpc" , "--rpc-port" , "8060"]
+EXPOSE 8060
+
+CMD [ "wasmflow", "serve", "/usr/src/todoapp/todos.wafl", "--rpc" , "--rpc-port" , "8060", "--rpc-address", "0.0.0.0"]

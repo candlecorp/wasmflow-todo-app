@@ -1,0 +1,18 @@
+version: '3'
+services:
+  envoy:
+    build:
+      context: .
+      dockerfile: Dockerfile-envoy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile-frontend
+
+
+  wasmflow:
+    build:
+      context: .
+      dockerfile: Dockerfile-wasmflow
+    
