@@ -4,15 +4,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-envoy
+    ports:
+      - "8080:8080"
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile-frontend
-
+    ports:
+      - "8000:80"
 
   wasmflow:
     build:
       context: .
       dockerfile: Dockerfile-wasmflow
-    
+    ports:
+      - "8060:8060"
